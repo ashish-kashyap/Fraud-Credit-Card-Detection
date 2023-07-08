@@ -1,51 +1,29 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 import json
-from app.utils import predict_price
+from app.utils import get_class
 
-features = {
-    "Item_Weight" : {
-        "type": "numeric"
-        },
-    "Item_Fat_Content" : {
-        "type": "select", 
-        "options": ["Low_Fat", "Regular"]
-        },
-    "Item_Visibility" : {
-        "type": "numeric"
-        },
-    "Item_Type": {
-        "type": "select", 
-        "options": ["Dairy", "Soft_Drinks", "Meat", "Fruits_and_Vegetables", "Household", "Baking_Goods", "Snack_Foods", "Frozen_Foods", "Breakfast", "Health_and_Hygiene", "Hard_Drinks", "Canned", "Breads", "Starchy Foods", "Others", "Seafood"]
-        },
-    "Item_MRP" : {
-        "type": "numeric"
-        },
-    "Outlet_Size": {
-        "type": "select", 
-        "options": ["Medium", "High", "Small"]
-        },
-    "Outlet_Location_Type": {
-        "type": "select", 
-        "options": ["Tier_1", "Tier_2", "Tier_3"]
-        },
-    "Outlet_Type": {
-        "type": "select", 
-        "options": ["Supermarket_Type1", "Supermarket_Type2", "Supermarket_Type3", "Grocery_Store"]
-        },
-    "Outlet_Establishment_Year" : {
-        "type": "numeric"
-        },
-    "Item_Outlet_Sales" : {
-        "type": "output"
-        },            
-}
+
+
+features = dict()
+features['Time'] =  { "type": "text" }
+
+for i in range(1, 29):
+    features[f'V{i}'] = { "type": "text" }
+
+features['Amount'] =  { "type": "text" }
+
+features["Class"] = {"type": "output"}
+
+
 
 def homepage(request, *args, **kwargs):
     if request.method == 'GET':
+
         hostname = f"http://{request.get_host()}/"
         if request.is_secure():
             hostname = f"https://{request.get_host()}/"
+
         context = {
             "response": "Hello World!!!", 
             "features": features,
@@ -58,7 +36,7 @@ def homepage(request, *args, **kwargs):
         return JsonResponse({
             "predictions": {
                 "id":body['i'],
-                "value":predict_price(body)
+                "value": 'Fraud' if get_class(body)==1 else 'Legit'
                 }, 
             "features": features
             })
